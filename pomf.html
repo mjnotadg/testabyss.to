@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pomf</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #1a1a1a;
+      color: #fff;
+    }
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+    .sidebar {
+      width: 250px;
+      background-color: #222;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .sidebar h2 {
+      margin-top: 0;
+      color: #0af;
+    }
+    .playlist-item {
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    .playlist-item img {
+      width: 100%;
+      height: auto;
+      border-radius: 5px;
+    }
+    .main-content {
+      flex: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    video {
+      max-width: 100%;
+      max-height: 80vh;
+      border-radius: 5px;
+    }
+    .controls {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #0af;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #08c;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <h2>Playlist</h2>
+      <div id="playlist"></div>
+    </div>
+    <div class="main-content">
+      <video id="video-player" controls></video>
+      <div class="controls">
+        <button onclick="playPrevious()">Previous</button>
+        <button onclick="playNext()">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // List of video URLs (users can paste their list here)
+    const videoUrls = [
+      'https://pomf2.lain.la/f/0iq2qslk.mp4',
+      'https://pomf2.lain.la/f/2z20osp3.mp4',
+      'https://pomf2.lain.la/f/6yiqwzr6.mp4',
+      'https://pomf2.lain.la/f/a5s4y1ct.mp4',
+      'https://pomf2.lain.la/f/dc1k7hse.mp4',
+      'https://pomf2.lain.la/f/g93tl6mg.mp4'
+    ].filter(url => !url.endsWith('.html')); // Filter out non-video URLs like faq.html
+
+    const videoPlayer = document.getElementById('video-player');
+    const playlistContainer = document.getElementById('playlist');
+    let currentVideoIndex = 0;
+
+    // Function to populate playlist
+    function populatePlaylist() {
+      playlistContainer.innerHTML = '';
+      videoUrls.forEach((url, index) => {
+        const item = document.createElement('div');
+        item.className = 'playlist-item';
+        item.textContent = `Video ${index + 1}`;
+        item.onclick = () => playVideo(index);
+        playlistContainer.appendChild(item);
+      });
+    }
+
+    // Function to play a specific video
+    function playVideo(index) {
+      if (index >= 0 && index < videoUrls.length) {
+        currentVideoIndex = index;
+        videoPlayer.src = videoUrls[index];
+        videoPlayer.play();
+        updatePlaylistHighlight();
+      }
+    }
+
+    // Function to highlight the current video in the playlist
+    function updatePlaylistHighlight() {
+      const items = playlistContainer.getElementsByClassName('playlist-item');
+      for (let i = 0; i < items.length; i++) {
+        items[i].style.backgroundColor = i === currentVideoIndex ? '#333' : 'transparent';
+      }
+    }
+
+    // Function to play the previous video
+    function playPrevious() {
+      if (currentVideoIndex > 0) {
+        playVideo(currentVideoIndex - 1);
+      }
+    }
+
+    // Function to play the next video
+    function playNext() {
+      if (currentVideoIndex < videoUrls.length - 1) {
+        playVideo(currentVideoIndex + 1);
+      }
+    }
+
+    // Initialize playlist and play first video
+    populatePlaylist();
+    if (videoUrls.length > 0) {
+      playVideo(0);
+    }
+
+    // Auto-play next video when the current one ends
+    videoPlayer.onended = () => playNext();
+  </script>
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Playlist</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          animation: {
+            'slide-in': 'slideIn 0.3s ease-out',
+            'slide-out': 'slideOut 0.3s ease-in',
+          },
+          keyframes: {
+            slideIn: {
+              '0%': { transform: 'translateX(-100%)' },
+              '100%': { transform: 'translateX(0)' },
+            },
+            slideOut: {
+              '0%': { transform: 'translateX(0)' },
+              '100%': { transform: 'translateX(-100%)' },
+            },
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="flex flex-col md:flex-row min-h-screen bg-gray-900 overflow-hidden">
+
+  <!-- Just paste your iframes here -->
+  <div id="iframes" class="hidden">
+    <iframe width="640" height="360" src="https://short.icu/vyT6YREy2" frameborder="0" scrolling="0" allowfullscreen></iframe>
+    <iframe width="640" height="360" src="https://short.icu/dhTW4yi22" frameborder="0" scrolling="0" allowfullscreen></iframe>
+    <iframe width="640" height="360" src="https://short.icu/ZUQpA0KM3" frameborder="0" scrolling="0" allowfullscreen></iframe>
+    <iframe width="640" height="360" src="https://short.icu/DfEK9EhKIO" frameborder="0" scrolling="0" allowfullscreen></iframe>
+    <iframe width="640" height="360" src="https://short.icu/_6LnVz2kc" frameborder="0" scrolling="0" allowfullscreen></iframe>
+    <iframe width="640" height="360" src="https://short.icu/krjMjz5wO" frameborder="0" scrolling="0" allowfullscreen></iframe>
+    <iframe width="640" height="360" src="https://short.icu/mhUogJGBd" frameborder="0" scrolling="0" allowfullscreen></iframe>
+    <iframe width="640" height="360" src="https://short.icu/91EQlwDAf" frameborder="0" scrolling="0" allowfullscreen></iframe>
+    <iframe width="640" height="360" src="https://short.icu/DUk2mBWMOS" frameborder="0" scrolling="0" allowfullscreen></iframe>
+    <iframe width="640" height="360" src="https://short.icu/tYWd80wN5" frameborder="0" scrolling="0" allowfullscreen></iframe>
+    <iframe width="640" height="360" src="https://short.icu/HMsL_1E7H" frameborder="0" scrolling="0" allowfullscreen></iframe>
+    <iframe width="640" height="360" src="https://short.icu/pGoQ__UB1" frameborder="0" scrolling="0" allowfullscreen></iframe>
+    <iframe width="640" height="360" src="https://short.icu/OVy4FKxPG" frameborder="0" scrolling="0" allowfullscreen></iframe>
+  </div>
+
+  <!-- Backdrop for mobile overlay -->
+  <div id="backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden transition-opacity duration-300"></div>
+
+  <!-- Playlist Sidebar (Collapsible) -->
+  <div id="playlistContainer" class="fixed inset-y-0 left-0 w-full md:w-64 bg-gray-800 text-white overflow-y-auto p-4 z-50 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 flex flex-col pointer-events-auto -translate-x-full md:translate-x-0 md:collapsed:w-0 md:collapsed:overflow-hidden">
+    <!-- Playlist Header -->
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-bold text-white">Playlist</h2>
+      <div class="flex items-center space-x-2">
+        <!-- Auto-Play Toggle -->
+        <button id="toggleAutoPlay" class="p-2 text-gray-300 hover:text-white" title="Toggle Auto-Play">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.5 5.5l15 7-15 7V5.5z"></path></svg>
+        </button>
+        <!-- Sidebar Toggle -->
+        <button id="togglePlaylist" class="p-2 text-gray-300 hover:text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+      </div>
+    </div>
+    <!-- Playlist Items -->
+    <div id="playlist" class="flex-1 pointer-events-auto"></div>
+  </div>
+
+  <!-- Toggle Button for Desktop (when collapsed) -->
+  <button id="togglePlaylistDesktop" class="fixed top-4 left-4 z-50 p-2 bg-gray-800 text-white rounded-md shadow-lg invisible">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+  </button>
+
+  <!-- Main Player Area -->
+  <div class="flex-1 flex items-center justify-center bg-black p-4 relative z-10 w-full transition-all duration-300 md:collapsed:ml-0">
+    <!-- Mobile Toggle Button -->
+    <button id="togglePlaylistMobile" class="absolute top-4 left-4 z-30 p-2 bg-gray-800 text-white rounded-md shadow-lg md:hidden">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+    </button>
+    <!-- Video Player with Navigation Arrows -->
+    <div class="relative w-full h-[70vh] md:h-[80vh] max-w-4xl">
+      <iframe id="videoPlayer" class="w-full h-full border-0" allow="autoplay" allowfullscreen></iframe>
+      <!-- Previous Arrow -->
+      <button id="prevVideo" class="absolute left-2 top-1/2 transform -translate-y-1/2 p-2 bg-gray-800 text-white rounded-full shadow-lg hover:bg-gray-700 z-20" title="Previous Video">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+      </button>
+      <!-- Next Arrow -->
+      <button id="nextVideo" class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-gray-800 text-white rounded-full shadow-lg hover:bg-gray-700 z-20" title="Next Video">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const iframes = document.querySelectorAll("#iframes iframe");
+    const playlist = document.getElementById("playlist");
+    const player = document.getElementById("videoPlayer");
+    const playlistContainer = document.getElementById("playlistContainer");
+    const backdrop = document.getElementById("backdrop");
+    const toggleMobile = document.getElementById("togglePlaylistMobile");
+    const toggleDesktop = document.getElementById("togglePlaylistDesktop");
+    const toggleInside = document.getElementById("togglePlaylist");
+    const toggleAutoPlay = document.getElementById("toggleAutoPlay");
+    const prevVideo = document.getElementById("prevVideo");
+    const nextVideo = document.getElementById("nextVideo");
+
+    let isCollapsed = window.innerWidth < 768;
+    let isAutoPlaying = false;
+    let currentVideoIndex = 0;
+    let autoPlayTimer = null;
+
+    // Default video duration (2 seconds)
+    const DEFAULT_VIDEO_DURATION = 2000;
+
+    // Generate playlist items
+    const playlistItems = [];
+    iframes.forEach((iframe, index) => {
+      const item = document.createElement("div");
+      item.className = "p-2 cursor-pointer hover:bg-gray-700 rounded-md transition-colors border-b border-gray-600 last:border-b-0 pointer-events-auto";
+      item.textContent = `Video ${index + 1}`;
+      item.dataset.index = index;
+      item.addEventListener("click", () => {
+        clearTimeout(autoPlayTimer);
+        playVideo(index);
+        if (isAutoPlaying) {
+          startAutoPlay(index);
+        }
+      });
+      playlist.appendChild(item);
+      playlistItems.push(item);
+    });
+
+    // Load first video
+    if (iframes.length > 0) {
+      playVideo(0);
+    }
+
+    // Play video at index
+    function playVideo(index) {
+      currentVideoIndex = index;
+      const baseSrc = iframes[index].src;
+      player.src = baseSrc.includes('?') ? `${baseSrc}&autoplay=1` : `${baseSrc}?autoplay=1`;
+      playlistItems.forEach(i => i.classList.remove("bg-gray-600"));
+      playlistItems[index].classList.add("bg-gray-600");
+    }
+
+    // Previous video
+    function prevVideoHandler() {
+      clearTimeout(autoPlayTimer);
+      const prevIndex = (currentVideoIndex - 1 + iframes.length) % iframes.length;
+      playVideo(prevIndex);
+      if (isAutoPlaying) {
+        startAutoPlay(prevIndex);
+      }
+    }
+
+    // Next video
+    function nextVideoHandler() {
+      clearTimeout(autoPlayTimer);
+      const nextIndex = (currentVideoIndex + 1) % iframes.length;
+      playVideo(nextIndex);
+      if (isAutoPlaying) {
+        startAutoPlay(nextIndex);
+      }
+    }
+
+    // Start auto-play
+    function startAutoPlay(startIndex = currentVideoIndex) {
+      isAutoPlaying = true;
+      toggleAutoPlay.querySelector("svg").classList.add("text-green-400");
+      clearTimeout(autoPlayTimer);
+      autoPlayTimer = setTimeout(() => {
+        const nextIndex = (currentVideoIndex + 1) % iframes.length;
+        playVideo(nextIndex);
+        startAutoPlay(nextIndex);
+      }, DEFAULT_VIDEO_DURATION);
+    }
+
+    // Stop auto-play
+    function stopAutoPlay() {
+      isAutoPlaying = false;
+      toggleAutoPlay.querySelector("svg").classList.remove("text-green-400");
+      clearTimeout(autoPlayTimer);
+    }
+
+    // Toggle auto-play
+    toggleAutoPlay.addEventListener("click", () => {
+      if (isAutoPlaying) {
+        stopAutoPlay();
+      } else {
+        startAutoPlay();
+      }
+    });
+
+    // Toggle sidebar
+    function togglePlaylist() {
+      isCollapsed = !isCollapsed;
+      if (isCollapsed) {
+        if (window.innerWidth < 768) {
+          playlistContainer.classList.add("-translate-x-full");
+          backdrop.classList.add("hidden");
+          backdrop.classList.remove("opacity-100");
+        } else {
+          playlistContainer.classList.add("collapsed");
+          toggleDesktop.classList.remove("invisible");
+        }
+      } else {
+        if (window.innerWidth < 768) {
+          playlistContainer.classList.remove("-translate-x-full");
+          backdrop.classList.remove("hidden");
+          backdrop.classList.add("opacity-100");
+        } else {
+          playlistContainer.classList.remove("collapsed");
+          toggleDesktop.classList.add("invisible");
+        }
+      }
+      updateIcons();
+    }
+
+    // Update toggle icons
+    function updateIcons() {
+      const mobileIcon = toggleMobile.querySelector("svg");
+      const desktopIcon = toggleDesktop.querySelector("svg");
+      const insideIcon = toggleInside.querySelector("svg");
+
+      if (isCollapsed) {
+        mobileIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>';
+        desktopIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>';
+        insideIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>';
+      } else {
+        mobileIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>';
+        desktopIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>';
+        insideIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>';
+      }
+    }
+
+    // Event listeners
+    toggleMobile.addEventListener("click", togglePlaylist);
+    toggleDesktop.addEventListener("click", togglePlaylist);
+    toggleInside.addEventListener("click", togglePlaylist);
+    backdrop.addEventListener("click", togglePlaylist);
+    prevVideo.addEventListener("click", prevVideoHandler);
+    nextVideo.addEventListener("click", nextVideoHandler);
+
+    // Handle window resize
+    window.addEventListener("resize", () => {
+      if (window.innerWidth >= 768) {
+        isCollapsed = false;
+        playlistContainer.classList.remove("-translate-x-full", "collapsed");
+        backdrop.classList.add("hidden");
+        toggleDesktop.classList.add("invisible");
+        playlistContainer.classList.add("pointer-events-auto");
+      } else {
+        if (!isCollapsed) {
+          playlistContainer.classList.remove("-translate-x-full");
+          backdrop.classList.remove("hidden");
+        } else {
+          playlistContainer.classList.add("-translate-x-full");
+          backdrop.classList.add("hidden");
+        }
+      }
+      updateIcons();
+    });
+
+    // Initialize
+    updateIcons();
+  </script>
+
+</body>
+</html>

@@ -2,96 +2,66 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Video Playlist</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      display: flex;
-      height: 100vh;
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Source Selector</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          animation: {
+            'slide-in': 'slideIn 0.3s ease-out',
+            'slide-out': 'slideOut 0.3s ease-in',
+          },
+          keyframes: {
+            slideIn: {
+              '0%': { transform: 'translateX(-100%)' },
+              '100%': { transform: 'translateX(0)' },
+            },
+            slideOut: {
+              '0%': { transform: 'translateX(0)' },
+              '100%': { transform: 'translateX(-100%)' },
+            },
+          }
+        }
+      }
     }
-    .playlist {
-      width: 220px;
-      background: #222;
-      color: #fff;
-      overflow-y: auto;
-      padding: 10px;
-    }
-    .playlist-item {
-      padding: 8px;
-      cursor: pointer;
-      border-bottom: 1px solid #444;
-    }
-    .playlist-item:hover {
-      background: #444;
-    }
-    .active {
-      background: #555;
-    }
-    .player {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #000;
-    }
-    .player iframe {
-      width: 80%;
-      height: 80%;
-      border: none;
-    }
-    /* Hide original iframes list */
-    #iframes { display: none; }
-  </style>
+  </script>
 </head>
-<body>
+<body class="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-4 overflow-hidden">
 
-  <!-- Just paste your iframes here -->
-  <div id="iframes">
-<iframe width="640" height="360" src="https://short.icu/V2DxszMeD" frameborder="0" scrolling="0" allowfullscreen></iframe>
-<iframe width="640" height="360" src="https://short.icu/vyT6YREy2" frameborder="0" scrolling="0" allowfullscreen></iframe>
-<iframe width="640" height="360" src="https://short.icu/dhTW4yi22" frameborder="0" scrolling="0" allowfullscreen></iframe>
-<iframe width="640" height="360" src="https://short.icu/ZUQpA0KM3" frameborder="0" scrolling="0" allowfullscreen></iframe>
-<iframe width="640" height="360" src="https://short.icu/DfEK9EhKIO" frameborder="0" scrolling="0" allowfullscreen></iframe>
-<iframe width="640" height="360" src="https://short.icu/_6LnVz2kc" frameborder="0" scrolling="0" allowfullscreen></iframe>
-<iframe width="640" height="360" src="https://short.icu/krjMjz5wO" frameborder="0" scrolling="0" allowfullscreen></iframe>
-<iframe width="640" height="360" src="https://short.icu/mhUogJGBd" frameborder="0" scrolling="0" allowfullscreen></iframe>
-<iframe width="640" height="360" src="https://short.icu/91EQlwDAf" frameborder="0" scrolling="0" allowfullscreen></iframe>
-<iframe width="640" height="360" src="https://short.icu/DUk2mBWMOS" frameborder="0" scrolling="0" allowfullscreen></iframe>
-<iframe width="640" height="360" src="https://short.icu/tYWd80wN5" frameborder="0" scrolling="0" allowfullscreen></iframe>
-<iframe width="640" height="360" src="https://short.icu/HMsL_1E7H" frameborder="0" scrolling="0" allowfullscreen></iframe>
-<iframe width="640" height="360" src="https://short.icu/pGoQ__UB1" frameborder="0" scrolling="0" allowfullscreen></iframe>
-<iframe width="640" height="360" src="https://short.icu/OVy4FKxPG" frameborder="0" scrolling="0" allowfullscreen></iframe>
-<iframe width="640" height="360" src="https://short.icu/f_D2Fd4E1" frameborder="0" scrolling="0" allowfullscreen></iframe>
-  </div>
+  <!-- Main Content -->
+  <div class="w-full max-w-md flex flex-col items-center space-y-6 animate-slide-in">
+    <!-- Title -->
+    <h1 class="text-2xl font-bold text-center">Select Video Source</h1>
 
-  <div class="playlist" id="playlist"></div>
-  <div class="player">
-    <iframe id="videoPlayer" allowfullscreen></iframe>
+    <!-- Buttons -->
+    <div class="flex space-x-4 w-full justify-center">
+      <a href="abyss.html" id="abyssButton" class="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md shadow-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center">
+        Abyss
+      </a>
+      <a href="pomf.html" id="pomfButton" class="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md shadow-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 text-center">
+        Pomf
+      </a>
+    </div>
+
+    <!-- Information Box -->
+    <div class="w-full p-6 bg-gray-800 rounded-md shadow-lg border border-gray-700 animate-slide-in">
+      <h2 class="text-lg font-semibold mb-3 text-gray-300">Source Information</h2>
+      <p class="text-sm text-gray-200 mb-2">
+        <strong>Abyss:</strong> This is the place the video will load a bit faster, but have ads, need browser have ads blocker extension enable.
+      </p>
+      <p class="text-sm text-gray-200">
+        <strong>Pomf:</strong> No ads, but slower.
+      </p>
+    </div>
   </div>
 
   <script>
-    const iframes = document.querySelectorAll("#iframes iframe");
-    const playlist = document.getElementById("playlist");
-    const player = document.getElementById("videoPlayer");
-
-    iframes.forEach((iframe, index) => {
-      let item = document.createElement("div");
-      item.className = "playlist-item";
-      item.textContent = "Video " + (index + 1);
-      item.addEventListener("click", () => {
-        player.src = iframe.src;
-        document.querySelectorAll(".playlist-item").forEach(i => i.classList.remove("active"));
-        item.classList.add("active");
-      });
-      playlist.appendChild(item);
+    // Handle window resize for responsiveness (similar to original)
+    window.addEventListener('resize', function() {
+      // Ensure layout adapts (no specific logic needed here, but placeholder for consistency)
     });
-
-    // load first video
-    if (iframes.length > 0) {
-      player.src = iframes[0].src;
-      playlist.firstChild.classList.add("active");
-    }
   </script>
 
 </body>
